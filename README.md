@@ -65,7 +65,7 @@ board_app/
 ├── CMakeLists.txt            board_core / board_ui / board_app + 自检工具 target
 ├── board_app.c/.h            启动引导（路径/存储/主题/会话/自动登录）
 ├── main_page/home_ui.c       首页（5 张卡片 + 顶栏账号胶囊）
-├── integration/              ★ 接入原始 lv_port_linux 所需文件（见第 9 节）
+├── integration/              ★ 接入原始 lv_port_linux 所需文件（见 4.1 节）
 │   ├── main.c                入口（调 board_app_init）
 │   ├── CMakeLists.txt        顶层构建（含 board_app 子目录 + -ldl）
 │   └── lv_conf.h             LVGL 配置（TinyTTF / 拼音输入法 / 内存）
@@ -102,7 +102,45 @@ board_app/
 
 完整逐文件说明见 [03 目录结构与编码规范](docs/03-directory-and-coding.md)。
 
-## 5. 快速开始（WSL）
+## 4.1 在原始 lv_port_linux 上构建（给别人看的第一步）
+
+本仓库只包含 `board_app/`。真正的程序要构建在 LVGL 官方的 lv_port_linux 工程里
+（它有 `lvgl/` 子模块和 fbdev/evdev 驱动）。三个**必须替换**的文件放在
+[`integration/`](integration/README.md)：
+
+| 文件 | 作用 |
+|---|---|
+| `integration/main.c` | 入口：`lv_init` → fbdev/evdev → `board_app_init(argv[0])` → 主循环 |
+| `integration/CMakeLists.txt` | 顶层构建：`add_subdirectory(board_app)`、`--whole-archive`（应用自动注册）、`-ldl`、可选 glibc 2.27 sysroot |
+| `integration/lv_conf.h` | LVGL 配置：TinyTTF、拼音输入法、4 MB 内存池、`LV_FS_STDIO_CACHE_SIZE 0` |
+
+```bash
+# 1) 干净的 lv_port_linux + lvgl 子模块（9.2.x）
+git clone https://github.com/lvgl/lv_port_linux.git
+cd lv_port_linux && git submodule update --init --recursive
+
+# 2) 放入本仓库，并覆盖三个接入文件
+git clone git@github.com:7L-jingzhe/board-app.git board_app
+cp board_app/integration/main.c          ./main.c
+cp board_app/integration/CMakeLists.txt  ./CMakeLists.txt
+cp board_app/integration/lv_conf.h       ./lv_conf.h
+
+# 3) 构建（aarch64 交叉编译；先准备 sysroot）
+bash board_app/tools/setup_bionic_sysroot.sh
+cmake -S . -B build_board_app && cmake --build build_board_app -j8
+file bin/main        # => ELF ... ARM aarch64
+```
+
+> 还有一处对上游文件的改动：`lvgl/CMakeLists.txt` 的 `project(... LANGUAGES C CXX ASM)`
+> 要改成 `C ASM`（板端没有 C++ 交叉编译器）。升级 LVGL 后需要重新改一次。
+> 详细说明（含三个文件相对上游改了什么）见 [`integration/README.md`](integration/README.md)。
+
+如果只想在本机（x86_64）看界面，用 `tests/preview` 的 headless 预览，不需要板子。
+
+## 5. 快速开始（WSL，本机开发用）
+
+> 如果是在别人的 lv_port_linux 上从零接入，请先按 [4.1 节](#41-在原始-lv_port_linux-上构建给别人看的第一步) 放好三个接入文件；
+> 本节假设 `board_app/` 已经在你的工程里，讲的是日常「改代码 → 编译 → 部署」。
 
 > 编译必须在 WSL 的 ext4 目录进行，不要在 `/mnt/d` 上直接构建。
 

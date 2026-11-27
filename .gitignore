@@ -1,0 +1,33 @@
+# 构建产物
+build/
+build_*/
+bin/
+*.o
+*.a
+*.so
+*.so.*
+
+# 运行时数据（保留占位文件与常用语配置）
+data/settings.conf
+data/comm_history/
+data/cache/*
+!data/cache/.gitkeep
+data/edited/*
+!data/edited/.gitkeep
+data/offline/
+data/accounts.txt
+data/friends.txt
+
+# 日志与临时文件
+*.raw
+*.log
+*.tmp
+*.bak
+*.bak_
+*~
+.DS_Store
+
+# 敏感信息：不要把本地 key/证书提交上去
+*.key
+*.pem
+.env

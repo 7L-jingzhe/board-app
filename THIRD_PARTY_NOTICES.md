@@ -15,7 +15,7 @@ texts are kept next to the code; this file is the short distribution notice.
 | Unicode Han Database (Unihan) | UCD `latest` | Unicode License v3 | `assets/ime/pinyin_dict.txt` (derived data) |
 | Sample photos / design mockups | project-generated | CC0 1.0 | `assets/photos/`, `docs/design/` |
 
-- Project code: MIT, see `LICENSE`.
+- Project code: MIT, Copyright (c) 2026 7L-jingzhe, see `LICENSE`.
 - `assets/fonts/OFL.txt` is the SIL OFL text for Noto Sans SC.
 - `assets/ime/pinyin_dict.txt` is derived from Unihan `kMandarin`
   (<https://www.unicode.org/Public/UCD/latest/ucd/Unihan.zip>) restricted to the
